@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!-- saved from url=(0022)http://127.0.0.1:5000/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Scientific Web Calculator</title>
+  <link rel="stylesheet" href="./Scientific Web Calculator_files/style.css">
+</head>  <!-- ✅ Ye closing tag missing tha -->
+
+<body>
+  <div class="container">
+    <h2>Scientific Calculator 🔢</h2>
+    <input type="text" id="display" placeholder="e.g. sin(30)+√9" onkeydown="handleKey(event)">
+    
+    <div class="buttons">
+      <button onclick="add(&#39;7&#39;)">7</button>
+      <button onclick="add(&#39;8&#39;)">8</button>
+      <button onclick="add(&#39;9&#39;)">9</button>
+      <button onclick="add(&#39;+&#39;)">+</button>
+      <button onclick="add(&#39;4&#39;)">4</button>
+      <button onclick="add(&#39;5&#39;)">5</button>
+      <button onclick="add(&#39;6&#39;)">6</button>
+      <button onclick="add(&#39;-&#39;)">-</button>
+      <button onclick="add(&#39;1&#39;)">1</button>
+      <button onclick="add(&#39;2&#39;)">2</button>
+      <button onclick="add(&#39;3&#39;)">3</button>
+      <button onclick="add(&#39;*&#39;)">*</button>
+      <button onclick="add(&#39;0&#39;)">0</button>
+      <button onclick="add(&#39;.&#39;)">.</button>
+      <button onclick="calculate()">=</button>
+      <button onclick="add(&#39;/&#39;)">/</button>
+      <button onclick="add(&#39;%&#39;)">%</button>
+      <button onclick="add(&#39;^&#39;)">^</button>
+      <button onclick="add(&#39;√(&#39;)">√</button>
+      <button onclick="clearDisplay()">C</button>
+      <button onclick="add(&#39;sin(&#39;)">sin</button>
+      <button onclick="add(&#39;cos(&#39;)">cos</button>
+      <button onclick="add(&#39;tan(&#39;)">tan</button>
+      <button onclick="add(&#39;log(&#39;)">log</button>
+      <button onclick="add(&#39;ln(&#39;)">ln</button>
+      <button onclick="add(&#39;pi&#39;)">π</button>
+      <button onclick="add(&#39;e&#39;)">e</button>
+      <button onclick="toggleTheme()">🌓</button>
+      <button onclick="explain()">Explain</button>
+    </div>
+
+    <div id="result">Result: --</div>
+
+    <div id="history">
+      <h4>History</h4>
+      <ul id="historyList">
+        
+      </ul>
+      <button class="clear-btn" onclick="clearHistory()">Clear History</button>
+    </div>
+  </div>
+
+  <script>
+    function add(val) {
+      document.getElementById('display').value += val;
+    }
+
+    function clearDisplay() {
+      document.getElementById('display').value = '';
+      document.getElementById('result').innerText = 'Result: --';
+    }
+
+    function handleKey(e) {
+      if (e.key === "Enter") calculate();
+    }
+
+    async function calculate() {
+      const expression = document.getElementById('display').value;
+      const res = await fetch('/calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expression })
+      });
+
+      const data = await res.json();
+      document.getElementById('result').innerText = 'Result: ' + data.result;
+
+      const li = document.createElement('li');
+      li.innerText = expression + ' = ' + data.result;
+      document.getElementById('historyList').appendChild(li);
+    }
+
+    async function clearHistory() {
+      await fetch('/clear_history', { method: 'POST' });
+      document.getElementById('historyList').innerHTML = '';
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+    }
+
+    function explain() {
+      const expression = document.getElementById("display").value;
+      fetch("/explain", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expression: expression })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert("AI Explain:\n" + data.explanation);
+      });
+    }
+  </script>
+
+</body></html>
